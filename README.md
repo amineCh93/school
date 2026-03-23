@@ -13,6 +13,13 @@ A minimal JavaScript REST API for school management.
 ## Endpoint
 
 - `GET /api/schools` returns a sample list of schools.
+- `POST /api/management/schools`, `GET /api/management/schools`, `GET /api/management/schools/:id`, `PATCH /api/management/schools/:id`, `DELETE /api/management/schools/:id` provide School CRUD.
+- `POST /api/management/students`, `GET /api/management/students`, `GET /api/management/students/:id`, `PATCH /api/management/students/:id`, `DELETE /api/management/students/:id` provide Student CRUD.
+- `POST /api/management/headmasters`, `GET /api/management/headmasters`, `GET /api/management/headmasters/:id`, `PATCH /api/management/headmasters/:id`, `DELETE /api/management/headmasters/:id` provide Headmaster CRUD.
+- `POST /api/management/interactions/assign-headmaster` assigns a headmaster to a school.
+- `POST /api/management/interactions/enroll-student` enrolls a student into a school.
+- `POST /api/management/interactions/transfer-student` transfers a student between schools.
+- All management interactions dispatch user notifications through the notification microservice.
 - `GET /` returns a basic API status message.
 - `POST /auth/register` creates a user account.
 - `POST /auth/login` returns a JWT token.
@@ -25,6 +32,7 @@ A minimal JavaScript REST API for school management.
 - `AUTH_ISSUER` sets JWT issuer (default: `school-management-api`).
 - `AUTH_AUDIENCE` sets JWT audience (default: `school-management-clients`).
 - `BCRYPT_ROUNDS` configures bcrypt cost factor (default: `12`, allowed range `10-14`).
+- `NOTIFICATION_SERVICE_URL` sets the notification microservice base URL (default: `http://127.0.0.1:4000`).
 - `CORS_ORIGIN` sets allowed origins as comma-separated values.
 - `PUBLIC_RATE_LIMIT_WINDOW_MS` sets non-auth rate-limit window in ms (default: `900000`).
 - `PUBLIC_RATE_LIMIT_MAX` sets non-auth max requests per window (default: `200`).
@@ -87,5 +95,6 @@ The server runs locally on port `3000`.
 - `src/infrastructure` contains adapters (repositories/services).
 - `src/routes` and `src/middleware` expose the HTTP interface.
 - `config/env.js` centralizes environment configuration.
+- `src/models/schoolModel.js`, `src/models/studentModel.js`, and `src/models/headmasterModel.js` define MongoDB collections for management CRUD.
 - `tests/api.test.js` verifies the API responses.
 - `tests/userModel.test.js` verifies user schema behavior.

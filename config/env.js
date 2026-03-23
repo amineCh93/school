@@ -15,6 +15,7 @@ const rawBcryptRounds = Number.parseInt(process.env.BCRYPT_ROUNDS || '12', 10);
 const bcryptRounds = Number.isNaN(rawBcryptRounds)
   ? 12
   : Math.min(Math.max(rawBcryptRounds, 10), 14);
+const notificationServiceUrl = (process.env.NOTIFICATION_SERVICE_URL || 'http://127.0.0.1:4000').trim();
 const corsOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3000,http://127.0.0.1:3000')
   .split(',')
   .map((origin) => origin.trim())
@@ -28,5 +29,6 @@ module.exports = {
   publicRateLimitWindowMs,
   publicRateLimitMax,
   bcryptRounds,
+  notificationServiceUrl,
   corsOrigins
 };
