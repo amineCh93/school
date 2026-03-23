@@ -2,6 +2,14 @@
 
 A minimal JavaScript REST API for school management.
 
+## Documentation rapide (FR)
+
+- Cette API expose des routes Express pour la gestion scolaire et l'authentification.
+- La connexion MongoDB est centralisée dans `database.js` via `MONGODB_URI`.
+- Le modèle utilisateur Mongoose est défini dans `models/userModel.js`.
+- Les secrets locaux doivent être placés dans `.env`, jamais dans Git.
+- Avant une livraison, exécuter `npm test` puis pousser une branche propre.
+
 ## Endpoint
 
 - `GET /api/schools` returns a sample list of schools.
@@ -12,6 +20,7 @@ A minimal JavaScript REST API for school management.
 
 ## Environment
 
+- `MONGODB_URI` sets the MongoDB connection string (default: `mongodb://127.0.0.1:27017/school_management`).
 - `AUTH_SECRET` is required and sets the JWT signing secret.
 - `AUTH_ISSUER` sets JWT issuer (default: `school-management-api`).
 - `AUTH_AUDIENCE` sets JWT audience (default: `school-management-clients`).
@@ -53,7 +62,8 @@ A minimal JavaScript REST API for school management.
 ## Run
 
 1. Install dependencies with `npm install`
-2. Start the API with `npm start`
+2. Create a local `.env` file with at least `AUTH_SECRET` and, if needed, `MONGODB_URI`
+3. Start the API with `npm start`
 
 The server runs locally on port `3000`.
 
@@ -61,8 +71,19 @@ The server runs locally on port `3000`.
 
 - Run `npm test` to execute the API tests.
 
+## Merge Checklist
+
+- Confirm the working tree is clean before opening the merge request.
+- Run `npm test` and ensure all tests pass.
+- Verify local environment values are stored in `.env` and not committed.
+- Confirm new code follows the existing CommonJS and Express project conventions.
+- Push the latest branch state before requesting review.
+
 ## Structure
 
 - `app.js` starts the Express app.
+- `database.js` manages MongoDB connection lifecycle.
+- `models/userModel.js` defines the Mongoose user schema.
 - `routes/api.js` contains the school management routes.
 - `tests/api.test.js` verifies the API responses.
+- `tests/userModel.test.js` verifies user schema behavior.
