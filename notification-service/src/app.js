@@ -1,9 +1,11 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const helmet = require('helmet');
 const cors = require('cors');
 const env = require('../config/env');
 const notificationRoutes = require('./routes/notifications');
 const { connectToDatabase } = require('./database');
+const logger = require('./utils/logger');
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -25,11 +27,50 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json({ limit: '16kb' }));
+app.use((req, res, next) => {
+  const startedAt = Date.now();
+
+  res.on('finish', () => {
+    logger.http('HTTP request completed', {
+      method: req.method,
+      path: req.originalUrl,
+      statusCode: res.statusCode,
+      durationMs: Date.now() - startedAt
+    });
+  });
+
+  next();
+});
 
 app.get('/', (_req, res) => {
   // Point de santé du microservice.
   res.json({
     message: 'Notification service is running.'
+  });
+});
+
+app.get('/health/live', (_req, res) => {
+  res.json({
+    status: 'ok',
+    service: 'notification-service',
+    timestamp: new Date().toISOString(),
+    uptimeSeconds: Math.floor(process.uptime())
+  });
+});
+
+app.get('/health/ready', (_req, res) => {
+  const isDbReady = env.shouldSkipDatabase || mongoose.connection.readyState === 1;
+  const statusCode = isDbReady ? 200 : 503;
+
+  res.status(statusCode).json({
+    status: isDbReady ? 'ready' : 'not_ready',
+    service: 'notification-service',
+    mode: env.shouldSkipDatabase ? 'preview' : 'database',
+    database: {
+      ready: isDbReady,
+      state: mongoose.connection.readyState
+    },
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -39,7 +80,7 @@ app.use(errorHandler);
 
 function startServer() {
   app.listen(env.port, () => {
-    console.log(`Notification service listening on port ${env.port}`);
+    logger.info('Notification service listening', { port: env.port });
   });
 }
 
@@ -54,7 +95,10 @@ if (require.main === module) {
         startServer();
       })
       .catch((error) => {
-        console.error('Database connection failed.', error);
+        logger.error('Database connection failed.', {
+          message: error.message,
+          stack: error.stack
+        });
         process.exit(1);
       });
   }

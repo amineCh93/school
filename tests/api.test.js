@@ -53,6 +53,29 @@ test('GET / returns API status', async () => {
   });
 });
 
+test('GET /health/live returns liveness payload', async () => {
+  const response = await fetch(`${baseUrl}/health/live`);
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(body.status, 'ok');
+  assert.equal(body.service, 'school-management-api');
+  assert.equal(typeof body.uptimeSeconds, 'number');
+  assert.equal(typeof body.timestamp, 'string');
+});
+
+test('GET /health/ready returns readiness payload', async () => {
+  const response = await fetch(`${baseUrl}/health/ready`);
+  const body = await response.json();
+
+  assert.ok([200, 503].includes(response.status));
+  assert.ok(['ready', 'not_ready'].includes(body.status));
+  assert.equal(body.service, 'school-management-api');
+  assert.equal(typeof body.database.ready, 'boolean');
+  assert.equal(typeof body.database.state, 'number');
+  assert.equal(typeof body.timestamp, 'string');
+});
+
 test('GET / includes secure headers and hides framework signature', async () => {
   const response = await fetch(`${baseUrl}/`);
 
@@ -99,6 +122,16 @@ test('GET /api/schools returns school data', async () => {
     address: '12 Elm Street'
   });
   assert.equal(typeof response.headers.get('ratelimit'), 'string');
+});
+
+test('GET /api/branding returns branding payload', async () => {
+  const response = await fetch(`${baseUrl}/api/branding`);
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(typeof body.schoolName, 'string');
+  assert.equal(typeof body.logoUrl, 'string');
+  assert.ok(['default', 'database'].includes(body.source));
 });
 
 test('GET /auth/me rejects missing token', async () => {

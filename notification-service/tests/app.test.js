@@ -42,6 +42,28 @@ test('GET / returns notification service status', async () => {
   });
 });
 
+test('GET /health/live returns liveness payload', async () => {
+  const response = await fetch(`${baseUrl}/health/live`);
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(body.status, 'ok');
+  assert.equal(body.service, 'notification-service');
+  assert.equal(typeof body.uptimeSeconds, 'number');
+  assert.equal(typeof body.timestamp, 'string');
+});
+
+test('GET /health/ready returns ready in preview mode', async () => {
+  const response = await fetch(`${baseUrl}/health/ready`);
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(body.status, 'ready');
+  assert.equal(body.service, 'notification-service');
+  assert.equal(body.mode, 'preview');
+  assert.equal(body.database.ready, true);
+});
+
 test('GET / includes secure headers and hides framework signature', async () => {
   const response = await fetch(`${baseUrl}/`);
 

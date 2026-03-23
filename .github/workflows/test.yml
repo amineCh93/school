@@ -1,0 +1,48 @@
+name: CI Tests
+
+on:
+  push:
+    branches: ["master", "main"]
+  pull_request:
+    branches: ["master", "main"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            notification-service/package-lock.json
+
+      - name: Install dependencies (root)
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Run tests (root)
+        run: npm test
+
+      - name: Install dependencies (notification-service)
+        working-directory: notification-service
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Run tests (notification-service)
+        working-directory: notification-service
+        run: npm test

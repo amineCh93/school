@@ -1,0 +1,165 @@
+name: Specialized Integrations
+
+on:
+  push:
+    branches: ["master", "main"]
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "notification-service/**"
+      - ".github/workflows/custom-workflows.yml"
+  pull_request:
+    branches: ["master", "main"]
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "notification-service/**"
+      - ".github/workflows/custom-workflows.yml"
+  workflow_dispatch:
+    inputs:
+      target_service:
+        description: "Service target to test"
+        required: true
+        type: choice
+        default: all
+        options:
+          - all
+          - api
+          - notification
+      run_smoke_checks:
+        description: "Run HTTP health smoke checks"
+        required: true
+        type: boolean
+        default: true
+      notify_slack:
+        description: "Send Slack notification if SLACK_WEBHOOK_URL secret exists"
+        required: true
+        type: boolean
+        default: false
+
+jobs:
+  api-tests:
+    name: API Tests
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.target_service == 'all' || inputs.target_service == 'api' }}
+    env:
+      AUTH_SECRET: ci-auth-secret
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies (root)
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Run API tests
+        run: npm test
+
+  notification-tests:
+    name: Notification Tests
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.target_service == 'all' || inputs.target_service == 'notification' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: notification-service/package-lock.json
+
+      - name: Install dependencies (notification-service)
+        working-directory: notification-service
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Run notification service tests
+        working-directory: notification-service
+        run: npm test
+
+  smoke-checks:
+    name: Health Smoke Checks
+    runs-on: ubuntu-latest
+    needs: [api-tests, notification-tests]
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.run_smoke_checks }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            notification-service/package-lock.json
+
+      - name: Install dependencies for smoke checks
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+          cd notification-service
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Smoke check API health endpoints
+        env:
+          AUTH_SECRET: ci-auth-secret
+        run: |
+          node -e "const app=require('./app'); app.listen(3100,()=>console.log('api-up')); setInterval(()=>{}, 1<<30);" &
+          API_PID=$!
+          sleep 2
+          curl --fail --silent --show-error http://127.0.0.1:3100/health/live > /dev/null
+          curl --fail --silent --show-error http://127.0.0.1:3100/health/ready > /dev/null
+          kill $API_PID
+
+      - name: Smoke check notification health endpoints
+        env:
+          SKIP_DB: "true"
+        run: |
+          node -e "const app=require('./notification-service/app'); app.listen(4100,()=>console.log('notification-up')); setInterval(()=>{}, 1<<30);" &
+          NOTIFICATION_PID=$!
+          sleep 2
+          curl --fail --silent --show-error http://127.0.0.1:4100/health/live > /dev/null
+          curl --fail --silent --show-error http://127.0.0.1:4100/health/ready > /dev/null
+          kill $NOTIFICATION_PID
+
+  slack-notification:
+    name: Slack Notification
+    runs-on: ubuntu-latest
+    needs: [api-tests, notification-tests, smoke-checks]
+    if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.notify_slack && secrets.SLACK_WEBHOOK_URL != '' }}
+    steps:
+      - name: Send Slack status summary
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          API_RESULT: ${{ needs.api-tests.result }}
+          NOTIFICATION_RESULT: ${{ needs.notification-tests.result }}
+          SMOKE_RESULT: ${{ needs.smoke-checks.result }}
+        run: |
+          PAYLOAD=$(printf '{"text":"Specialized workflow result\\nAPI: %s\\nNotification: %s\\nSmoke: %s\\nBranch: %s\\nCommit: %s"}' "$API_RESULT" "$NOTIFICATION_RESULT" "$SMOKE_RESULT" "${GITHUB_REF_NAME}" "${GITHUB_SHA}")
+          curl -X POST -H "Content-type: application/json" --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"

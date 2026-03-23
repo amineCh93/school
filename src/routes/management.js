@@ -21,7 +21,8 @@ const service = createManagementService({
 
 const schoolSchema = z.object({
   name: z.string().trim().min(1).max(150),
-  address: z.string().trim().min(1).max(255)
+  address: z.string().trim().min(1).max(255),
+  logoUrl: z.string().trim().url().max(500).optional()
 }).strict();
 
 const schoolUpdateSchema = schoolSchema.partial();

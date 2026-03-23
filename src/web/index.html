@@ -7,45 +7,55 @@
     <link rel="stylesheet" href="/portal/styles.css" />
   </head>
   <body>
-    <aside class="sidebar">
+    <a class="skip-link" href="#mainContent">Skip to main content</a>
+
+    <aside class="sidebar" aria-label="Portal navigation and session summary">
       <img
+        id="brandLogo"
         class="brand-logo"
         src="https://www.capgemini.com/wp-content/themes/capgemini2020/assets/images/logo.svg"
         alt="Capgemini"
       />
-      <h2>Capgemini School</h2>
+      <h2 id="brandName">Capgemini School</h2>
       <p class="muted">Enrollment · Access · Interactions</p>
       <div class="session-block">
         <strong>Session</strong>
-        <p id="sessionInfo">Not connected</p>
+        <p id="sessionInfo" aria-live="polite">Not connected</p>
       </div>
       <button id="logoutBtn" class="ghost hidden">Logout</button>
     </aside>
 
-    <main class="main">
+    <main class="main" id="mainContent" tabindex="-1">
       <header class="topbar">
         <h1>Control Center</h1>
-        <p id="roleHint" class="pill">Role: Guest</p>
+        <p id="roleHint" class="pill" aria-live="polite">Role: Guest</p>
       </header>
 
-      <section class="panel" id="authCard">
+      <section class="panel" aria-labelledby="statusHeading">
+        <h3 id="statusHeading">System Status</h3>
+        <p id="statusMessage" class="status-message" role="status" aria-live="polite">Portal is ready.</p>
+      </section>
+
+      <section class="panel" id="authCard" aria-labelledby="authHeading">
+        <h3 id="authHeading">Authentication</h3>
         <div class="split">
           <div>
-            <h3>Enroll (Register)</h3>
+            <h4>Enroll (Register)</h4>
             <form id="registerForm" class="grid three">
-              <label>Name<input type="text" id="registerName" required /></label>
-              <label>Email<input type="email" id="registerEmail" required /></label>
-              <label>Password<input type="password" id="registerPassword" required /></label>
+              <label>Name<input type="text" id="registerName" autocomplete="name" required aria-required="true" /></label>
+              <label>Email<input type="email" id="registerEmail" autocomplete="email" required aria-required="true" /></label>
+              <label>Password<input type="password" id="registerPassword" autocomplete="new-password" required aria-required="true" /></label>
+              <p class="field-hint">Use at least 10 characters with upper/lowercase, number, and symbol.</p>
               <button type="submit">Create Account</button>
             </form>
           </div>
           <div>
-            <h3>Access (Login)</h3>
+            <h4>Access (Login)</h4>
             <form id="loginForm" class="grid three">
-              <label>Email<input type="email" id="loginEmail" required /></label>
-              <label>Password<input type="password" id="loginPassword" required /></label>
+              <label>Email<input type="email" id="loginEmail" autocomplete="email" required aria-required="true" /></label>
+              <label>Password<input type="password" id="loginPassword" autocomplete="current-password" required aria-required="true" /></label>
               <label>Role
-                <select id="loginRole" required>
+                <select id="loginRole" required aria-required="true">
                   <option value="admin">Admin</option>
                   <option value="headmaster">Headmaster</option>
                   <option value="staff">Staff</option>
@@ -58,82 +68,94 @@
         </div>
       </section>
 
-      <section class="panel hidden" id="dashboard" data-role="admin,headmaster,staff,viewer">
-        <h3>Overview</h3>
+      <section class="panel hidden" id="dashboard" data-role="admin,headmaster,staff,viewer" aria-labelledby="overviewHeading">
+        <h3 id="overviewHeading">Overview</h3>
         <div class="kpi-grid">
-          <article><span>Schools</span><strong id="schoolsCount">0</strong></article>
-          <article><span>Headmasters</span><strong id="headmastersCount">0</strong></article>
-          <article><span>Students</span><strong id="studentsCount">0</strong></article>
+          <article><span>Schools</span><strong id="schoolsCount" aria-live="polite">0</strong></article>
+          <article><span>Headmasters</span><strong id="headmastersCount" aria-live="polite">0</strong></article>
+          <article><span>Students</span><strong id="studentsCount" aria-live="polite">0</strong></article>
+        </div>
+        <div class="analytics-grid">
+          <article class="chart-card">
+            <h4>Population Distribution</h4>
+            <svg id="populationChart" viewBox="0 0 360 180" class="chart-svg" role="img" aria-label="Population distribution chart"></svg>
+          </article>
+          <article class="chart-card">
+            <h4>Role Balance</h4>
+            <svg id="roleChart" viewBox="0 0 220 220" class="chart-svg" role="img" aria-label="Role balance chart"></svg>
+          </article>
         </div>
       </section>
 
-      <section class="panel hidden" id="schoolsCard" data-role="admin,headmaster,staff">
+      <section class="panel hidden" id="schoolsCard" data-role="admin,headmaster,staff" aria-labelledby="schoolsHeading">
         <div class="panel-header">
-          <h3>Schools</h3>
-          <button id="refreshSchoolsBtn" class="ghost">Refresh</button>
+          <h3 id="schoolsHeading">Schools</h3>
+          <button id="refreshSchoolsBtn" class="ghost" aria-label="Refresh schools list">Refresh</button>
         </div>
         <form id="createSchoolForm" class="grid three">
-          <label>Name<input type="text" id="schoolName" required /></label>
-          <label>Address<input type="text" id="schoolAddress" required /></label>
+          <label>Name<input type="text" id="schoolName" required aria-required="true" /></label>
+          <label>Address<input type="text" id="schoolAddress" required aria-required="true" /></label>
+          <label>Logo URL<input type="url" id="schoolLogoUrl" placeholder="https://.../logo.svg" aria-describedby="schoolLogoHint" /></label>
+          <p id="schoolLogoHint" class="field-hint">Optional. If provided, this logo will be used in the portal branding.</p>
           <button type="submit">Create School</button>
         </form>
-        <ul id="schoolsList" class="list"></ul>
+        <ul id="schoolsList" class="list" aria-live="polite" aria-label="Schools list"></ul>
       </section>
 
-      <section class="panel hidden" id="headmastersCard" data-role="admin,headmaster,staff">
+      <section class="panel hidden" id="headmastersCard" data-role="admin,headmaster,staff" aria-labelledby="headmastersHeading">
         <div class="panel-header">
-          <h3>Headmasters</h3>
-          <button id="refreshHeadmastersBtn" class="ghost">Refresh</button>
+          <h3 id="headmastersHeading">Headmasters</h3>
+          <button id="refreshHeadmastersBtn" class="ghost" aria-label="Refresh headmasters list">Refresh</button>
         </div>
         <form id="createHeadmasterForm" class="grid three">
-          <label>First Name<input type="text" id="headmasterFirstName" required /></label>
-          <label>Last Name<input type="text" id="headmasterLastName" required /></label>
-          <label>Email<input type="email" id="headmasterEmail" required /></label>
+          <label>First Name<input type="text" id="headmasterFirstName" autocomplete="given-name" required aria-required="true" /></label>
+          <label>Last Name<input type="text" id="headmasterLastName" autocomplete="family-name" required aria-required="true" /></label>
+          <label>Email<input type="email" id="headmasterEmail" autocomplete="email" required aria-required="true" /></label>
           <button type="submit">Create Headmaster</button>
         </form>
-        <ul id="headmastersList" class="list"></ul>
+        <ul id="headmastersList" class="list" aria-live="polite" aria-label="Headmasters list"></ul>
       </section>
 
-      <section class="panel hidden" id="studentsCard" data-role="admin,headmaster,staff">
+      <section class="panel hidden" id="studentsCard" data-role="admin,headmaster,staff" aria-labelledby="studentsHeading">
         <div class="panel-header">
-          <h3>Students</h3>
-          <button id="refreshStudentsBtn" class="ghost">Refresh</button>
+          <h3 id="studentsHeading">Students</h3>
+          <button id="refreshStudentsBtn" class="ghost" aria-label="Refresh students list">Refresh</button>
         </div>
         <form id="createStudentForm" class="grid three">
-          <label>First Name<input type="text" id="studentFirstName" required /></label>
-          <label>Last Name<input type="text" id="studentLastName" required /></label>
-          <label>Email<input type="email" id="studentEmail" required /></label>
+          <label>First Name<input type="text" id="studentFirstName" autocomplete="given-name" required aria-required="true" /></label>
+          <label>Last Name<input type="text" id="studentLastName" autocomplete="family-name" required aria-required="true" /></label>
+          <label>Email<input type="email" id="studentEmail" autocomplete="email" required aria-required="true" /></label>
           <button type="submit">Create Student</button>
         </form>
-        <ul id="studentsList" class="list"></ul>
+        <ul id="studentsList" class="list" aria-live="polite" aria-label="Students list"></ul>
       </section>
 
-      <section class="panel hidden" id="interactionsCard" data-role="admin,headmaster">
-        <h3>User Interactions</h3>
+      <section class="panel hidden" id="interactionsCard" data-role="admin,headmaster" aria-labelledby="interactionHeading">
+        <h3 id="interactionHeading">User Interactions</h3>
         <div class="split">
           <form id="assignHeadmasterForm" class="grid two">
-            <label>School ID<input type="text" id="assignSchoolId" required /></label>
-            <label>Headmaster ID<input type="text" id="assignHeadmasterId" required /></label>
+            <label>School ID<input type="text" id="assignSchoolId" required aria-required="true" /></label>
+            <label>Headmaster ID<input type="text" id="assignHeadmasterId" required aria-required="true" /></label>
             <button type="submit">Assign Headmaster</button>
           </form>
 
           <form id="enrollStudentForm" class="grid two">
-            <label>School ID<input type="text" id="enrollSchoolId" required /></label>
-            <label>Student ID<input type="text" id="enrollStudentId" required /></label>
+            <label>School ID<input type="text" id="enrollSchoolId" required aria-required="true" /></label>
+            <label>Student ID<input type="text" id="enrollStudentId" required aria-required="true" /></label>
             <button type="submit">Enroll Student</button>
           </form>
 
           <form id="transferStudentForm" class="grid two">
-            <label>Student ID<input type="text" id="transferStudentId" required /></label>
-            <label>Target School ID<input type="text" id="targetSchoolId" required /></label>
+            <label>Student ID<input type="text" id="transferStudentId" required aria-required="true" /></label>
+            <label>Target School ID<input type="text" id="targetSchoolId" required aria-required="true" /></label>
             <button type="submit">Transfer Student</button>
           </form>
         </div>
       </section>
 
-      <section class="panel">
-        <h3>Activity Log</h3>
-        <pre id="output"></pre>
+      <section class="panel" aria-labelledby="activityHeading">
+        <h3 id="activityHeading">Activity Log</h3>
+        <pre id="output" role="log" aria-live="polite" aria-atomic="false" tabindex="0"></pre>
       </section>
     </main>
 

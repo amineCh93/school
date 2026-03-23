@@ -81,6 +81,16 @@ The server runs locally on port `3000`.
 
 - Run `npm test` to execute the API tests.
 
+## CI/CD Integrations
+
+- GitHub Actions base CI is available in `.github/workflows/test.yml`.
+- Advanced workflow is available in `.github/workflows/custom-workflows.yml`.
+- The advanced workflow supports manual dispatch with:
+	- `target_service`: `all`, `api`, or `notification`
+	- `run_smoke_checks`: enables HTTP health checks (`/health/live`, `/health/ready`)
+	- `notify_slack`: sends a summary to Slack when `SLACK_WEBHOOK_URL` is configured in repository secrets
+- Jenkins pipeline support is available through `Jenkinsfile`.
+
 ## Merge Checklist
 
 - Confirm the working tree is clean before opening the merge request.

@@ -14,6 +14,12 @@ const schoolSchema = new mongoose.Schema(
       trim: true,
       maxlength: 255
     },
+    logoUrl: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      default: ''
+    },
     headmaster: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Headmaster',
