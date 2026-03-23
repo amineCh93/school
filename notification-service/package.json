@@ -1,0 +1,17 @@
+{
+  "name": "notification-service",
+  "version": "1.0.0",
+  "description": "Notification microservice for email, SMS, and push events.",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "mongoose": "^9.3.1",
+    "zod": "^4.3.6"
+  }
+}
