@@ -10,6 +10,7 @@ if (!AUTH_SECRET) {
 }
 
 function requireAuth(req, res, next) {
+  // Vérifie la présence du jeton Bearer dans l'en-tête Authorization.
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -21,6 +22,7 @@ function requireAuth(req, res, next) {
   const token = authHeader.slice(7);
 
   try {
+    // Valide la signature et les claims du JWT avant d'exposer l'utilisateur à la requête.
     const payload = jwt.verify(token, AUTH_SECRET, {
       algorithms: ['HS256'],
       issuer: AUTH_ISSUER,
@@ -29,6 +31,7 @@ function requireAuth(req, res, next) {
     req.user = payload;
     return next();
   } catch {
+    // Uniformise les erreurs de jeton invalide ou expiré.
     return next(new AppError('Invalid or expired token.', 401, 'INVALID_AUTH_TOKEN'));
   }
 }

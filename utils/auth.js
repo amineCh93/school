@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 function isStrongPassword(password) {
+  // Vérifie la politique minimale de robustesse du mot de passe.
   return (
     typeof password === 'string' &&
     password.length >= 10 &&
@@ -12,10 +13,12 @@ function isStrongPassword(password) {
 }
 
 function normalizeEmail(email) {
+  // Normalise les emails pour éviter les doublons liés à la casse ou aux espaces.
   return String(email).trim().toLowerCase();
 }
 
 function getAttemptKey(req, email) {
+  // Combine IP et email pour limiter les tentatives de connexion de manière plus fine.
   const forwardedFor = req.headers['x-forwarded-for'];
   const ip = Array.isArray(forwardedFor)
     ? forwardedFor[0]
@@ -32,6 +35,7 @@ function createAccessToken(
     audience = 'school-management-clients'
   } = {}
 ) {
+  // Génère un JWT signé contenant les informations utiles du profil utilisateur.
   return jwt.sign(
     {
       id: user.id,
@@ -58,6 +62,7 @@ class LoginAttemptTracker {
   }
 
   readState(attemptKey) {
+    // Lit l'état courant et réinitialise automatiquement un verrou expiré.
     const state = this.states.get(attemptKey);
 
     if (!state) {
@@ -79,6 +84,7 @@ class LoginAttemptTracker {
   }
 
   registerFailure(attemptKey) {
+    // Incrémente le compteur d'échecs et applique un verrou temporaire au seuil atteint.
     const now = this.nowProvider();
     const state = this.readState(attemptKey);
     const nextCount = state.count + 1;
@@ -98,6 +104,7 @@ class LoginAttemptTracker {
   }
 
   clear(attemptKey) {
+    // Efface l'état après une authentification réussie.
     this.states.delete(attemptKey);
   }
 }

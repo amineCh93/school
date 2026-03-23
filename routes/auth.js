@@ -33,17 +33,20 @@ const loginSchema = z.object({
   password: z.string().min(1).max(128)
 }).strict();
 
+// Enregistre un utilisateur en mémoire après validation et hachage du mot de passe.
 router.post('/register', validateBody(registerSchema), asyncHandler(async (req, res) => {
   const { name, email, password } = req.body ?? {};
 
   const normalizedEmail = normalizeEmail(email);
 
+  // Réponse idempotente si l'email existe déjà dans le stockage mémoire.
   if (usersByEmail.has(normalizedEmail)) {
     return res.status(201).json({
       message: 'Registration request processed.'
     });
   }
 
+  // Refuse les mots de passe qui ne respectent pas la politique de sécurité.
   if (!isStrongPassword(password)) {
     throw new AppError(
       'Password must be at least 10 characters and include uppercase, lowercase, number, and symbol.',
@@ -72,6 +75,7 @@ router.post('/register', validateBody(registerSchema), asyncHandler(async (req, 
   });
 }));
 
+// Authentifie un utilisateur et renvoie un JWT si les identifiants sont valides.
 router.post('/login', validateBody(loginSchema), asyncHandler(async (req, res) => {
   const { email, password } = req.body ?? {};
 
@@ -79,6 +83,7 @@ router.post('/login', validateBody(loginSchema), asyncHandler(async (req, res) =
   const attemptKey = getAttemptKey(req, normalizedEmail);
   const attemptState = loginAttemptTracker.readState(attemptKey);
 
+  // Bloque temporairement les nouvelles tentatives après trop d'échecs.
   if (attemptState.lockUntil > Date.now()) {
     const retryAfterSeconds = Math.ceil((attemptState.lockUntil - Date.now()) / 1000);
     res.setHeader('Retry-After', String(retryAfterSeconds));
@@ -91,6 +96,7 @@ router.post('/login', validateBody(loginSchema), asyncHandler(async (req, res) =
 
   const user = usersByEmail.get(normalizedEmail);
 
+  // Comptabilise l'échec si aucun utilisateur ne correspond à l'email fourni.
   if (!user) {
     loginAttemptTracker.registerFailure(attemptKey);
     throw new AppError('Invalid credentials.', 401, 'INVALID_CREDENTIALS');
@@ -98,11 +104,13 @@ router.post('/login', validateBody(loginSchema), asyncHandler(async (req, res) =
 
   const isValidPassword = await bcrypt.compare(password, user.passwordHash);
 
+  // Comptabilise l'échec si le mot de passe ne correspond pas.
   if (!isValidPassword) {
     loginAttemptTracker.registerFailure(attemptKey);
     throw new AppError('Invalid credentials.', 401, 'INVALID_CREDENTIALS');
   }
 
+  // Nettoie l'état de limitation après une authentification réussie.
   loginAttemptTracker.clear(attemptKey);
 
   const token = createAccessToken(user, AUTH_SECRET, {
@@ -116,6 +124,7 @@ router.post('/login', validateBody(loginSchema), asyncHandler(async (req, res) =
   });
 }));
 
+// Retourne le profil contenu dans le jeton après vérification par le middleware.
 router.get('/me', requireAuth, (req, res) => {
   return res.json({
     message: 'Authenticated user profile.',

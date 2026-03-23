@@ -18,6 +18,7 @@ const schools = [
   }
 ];
 
+// Retourne une liste d'écoles de démonstration pour valider le fonctionnement de l'API.
 router.get('/schools', (_req, res) => {
   res.json({
     message: 'School management endpoint is running.',

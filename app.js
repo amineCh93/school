@@ -27,15 +27,18 @@ const allowedOrigins = new Set(
 const statusPayload = {
   message: 'School management API is running.'
 };
+// Limiteur appliqué aux routes publiques hors authentification.
 const publicRateLimiter = rateLimit({
   windowMs: publicRateLimitWindowMs,
   max: publicRateLimitMax,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
   handler(_req, _res, next, options) {
+    // Convertit le dépassement de quota en erreur applicative uniforme.
     next(new AppError(options.message, options.statusCode, 'RATE_LIMIT_EXCEEDED'));
   },
   skip(req) {
+    // Les routes d'authentification gèrent leur propre stratégie de limitation.
     return req.path.startsWith('/auth');
   }
 });
@@ -44,11 +47,13 @@ app.disable('x-powered-by');
 app.use(helmet());
 app.use(cors({
   origin(origin, callback) {
+    // Autorise les appels sans origine explicite (tests locaux, outils backend).
     if (!origin) {
       callback(null, true);
       return;
     }
 
+    // Vérifie que l'origine fait partie de la liste autorisée.
     callback(null, allowedOrigins.has(origin));
   },
   methods: ['GET', 'POST', 'OPTIONS'],
@@ -60,6 +65,7 @@ app.use('/auth', authRoutes);
 app.use('/api', apiRoutes);
 
 app.get('/', (_req, res) => {
+  // Expose un point de santé simple pour vérifier que l'API répond.
   res.json(statusPayload);
 });
 
@@ -69,11 +75,13 @@ app.use(errorHandler);
 if (require.main === module) {
   connectToDatabase()
     .then(() => {
+      // Démarre le serveur uniquement lorsque la connexion à la base est prête.
       app.listen(port, () => {
         console.log(`School management API listening on port ${port}`);
       });
     })
     .catch((error) => {
+      // Termine le processus si l'application ne peut pas accéder à MongoDB.
       console.error('Database connection failed.', error);
       process.exit(1);
     });

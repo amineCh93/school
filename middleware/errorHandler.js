@@ -1,10 +1,12 @@
 const { AppError } = require('../utils/errors');
 
 function notFoundHandler(req, _res, next) {
+  // Produit une erreur 404 uniforme pour toutes les routes inconnues.
   next(new AppError(`Route not found: ${req.method} ${req.originalUrl}`, 404, 'NOT_FOUND'));
 }
 
 function errorHandler(err, _req, res, _next) {
+  // Détecte les corps JSON mal formés renvoyés par Express.
   if (err instanceof SyntaxError && err.status === 400 && Object.hasOwn(err, 'body')) {
     return res.status(400).json({
       error: {
@@ -14,6 +16,7 @@ function errorHandler(err, _req, res, _next) {
     });
   }
 
+  // Détecte les charges utiles dépassant la limite configurée.
   if (err && err.type === 'entity.too.large') {
     return res.status(413).json({
       error: {
@@ -28,6 +31,7 @@ function errorHandler(err, _req, res, _next) {
   const code = isAppError ? err.code : 'INTERNAL_ERROR';
   const message = isAppError ? err.message : 'An unexpected error occurred.';
 
+  // Construit une réponse d'erreur homogène pour tous les cas applicatifs.
   const response = {
     error: {
       code,
