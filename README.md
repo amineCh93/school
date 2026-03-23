@@ -24,6 +24,7 @@ A minimal JavaScript REST API for school management.
 - `POST /auth/register` creates a user account.
 - `POST /auth/login` returns a JWT token.
 - `GET /auth/me` returns authenticated user profile (requires `Authorization: Bearer <token>`).
+- `GET /portal` opens the web interface for enrollment, role-based access, and interaction management.
 
 ## Environment
 
@@ -72,6 +73,7 @@ A minimal JavaScript REST API for school management.
 1. Install dependencies with `npm install`
 2. Create a local `.env` file with at least `AUTH_SECRET` and, if needed, `MONGODB_URI`
 3. Start the API with `npm start`
+4. Open `http://127.0.0.1:3000/portal` for the professional web portal
 
 The server runs locally on port `3000`.
 

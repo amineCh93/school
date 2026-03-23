@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const helmet = require('helmet');
 const cors = require('cors');
 const { rateLimit } = require('express-rate-limit');
@@ -48,10 +49,15 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json({ limit: '16kb' }));
+app.use('/portal', express.static(path.join(__dirname, 'web')));
 app.use(publicRateLimiter);
 app.use('/auth', authRoutes);
 app.use('/api', apiRoutes);
 app.use('/api/management', managementRoutes);
+
+app.get('/portal', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'web', 'index.html'));
+});
 
 app.get('/', (_req, res) => {
   // Expose un point de santé simple pour vérifier que l'API répond.
