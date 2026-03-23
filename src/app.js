@@ -5,6 +5,7 @@ const { rateLimit } = require('express-rate-limit');
 const env = require('../config/env');
 const apiRoutes = require('./routes/api');
 const authRoutes = require('./routes/auth');
+const managementRoutes = require('./routes/management');
 const { connectToDatabase } = require('./database');
 const { AppError } = require('./utils/errors');
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
@@ -50,6 +51,7 @@ app.use(express.json({ limit: '16kb' }));
 app.use(publicRateLimiter);
 app.use('/auth', authRoutes);
 app.use('/api', apiRoutes);
+app.use('/api/management', managementRoutes);
 
 app.get('/', (_req, res) => {
   // Expose un point de santé simple pour vérifier que l'API répond.

@@ -26,6 +26,15 @@ function errorHandler(err, _req, res, _next) {
     });
   }
 
+  if (err && err.code === 11000) {
+    return res.status(409).json({
+      error: {
+        code: 'DUPLICATE_RESOURCE',
+        message: 'A resource with the same unique value already exists.'
+      }
+    });
+  }
+
   const isAppError = err instanceof AppError;
   const statusCode = isAppError ? err.statusCode : 500;
   const code = isAppError ? err.code : 'INTERNAL_ERROR';
