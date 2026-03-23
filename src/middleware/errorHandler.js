@@ -43,6 +43,10 @@ function errorHandler(err, _req, res, _next) {
     response.error.details = err.details;
   }
 
+  if (code === 'TOO_MANY_LOGIN_ATTEMPTS' && err.details?.retryAfterSeconds) {
+    res.setHeader('Retry-After', String(err.details.retryAfterSeconds));
+  }
+
   res.status(statusCode).json(response);
 }
 

@@ -2,7 +2,7 @@
   "name": "notification-service",
   "version": "1.0.0",
   "description": "Notification microservice for email, SMS, and push events.",
-  "main": "app.js",
+  "main": "src/app.js",
   "scripts": {
     "start": "node app.js",
     "test": "node --test"

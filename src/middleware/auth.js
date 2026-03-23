@@ -1,9 +1,10 @@
 const jwt = require('jsonwebtoken');
+const env = require('../../config/env');
 const { AppError } = require('../utils/errors');
 
-const AUTH_SECRET = process.env.AUTH_SECRET;
-const AUTH_ISSUER = process.env.AUTH_ISSUER || 'school-management-api';
-const AUTH_AUDIENCE = process.env.AUTH_AUDIENCE || 'school-management-clients';
+const AUTH_SECRET = env.authSecret;
+const AUTH_ISSUER = env.authIssuer;
+const AUTH_AUDIENCE = env.authAudience;
 
 if (!AUTH_SECRET) {
   throw new Error('AUTH_SECRET environment variable is required.');

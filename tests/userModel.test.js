@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const User = require('../models/userModel');
+const User = require('../src/models/userModel');
 
 test('User schema requires name, email, and passwordHash', () => {
   const user = new User({});

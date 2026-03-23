@@ -5,8 +5,8 @@ A minimal JavaScript REST API for school management.
 ## Documentation rapide (FR)
 
 - Cette API expose des routes Express pour la gestion scolaire et l'authentification.
-- La connexion MongoDB est centralisée dans `database.js` via `MONGODB_URI`.
-- Le modèle utilisateur Mongoose est défini dans `models/userModel.js`.
+- La connexion MongoDB est centralisée dans `src/database.js` via `MONGODB_URI`.
+- Le modèle utilisateur Mongoose est défini dans `src/models/userModel.js`.
 - Les secrets locaux doivent être placés dans `.env`, jamais dans Git.
 - Avant une livraison, exécuter `npm test` puis pousser une branche propre.
 
@@ -81,9 +81,11 @@ The server runs locally on port `3000`.
 
 ## Structure
 
-- `app.js` starts the Express app.
-- `database.js` manages MongoDB connection lifecycle.
-- `models/userModel.js` defines the Mongoose user schema.
-- `routes/api.js` contains the school management routes.
+- `app.js` is a compatibility entrypoint that forwards to `src/app.js`.
+- `src/domain` contains core business entities/rules.
+- `src/application` contains use cases and service orchestration.
+- `src/infrastructure` contains adapters (repositories/services).
+- `src/routes` and `src/middleware` expose the HTTP interface.
+- `config/env.js` centralizes environment configuration.
 - `tests/api.test.js` verifies the API responses.
 - `tests/userModel.test.js` verifies user schema behavior.
