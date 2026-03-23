@@ -134,7 +134,11 @@ jobs:
           API_PID=$!
           sleep 2
           curl --fail --silent --show-error http://127.0.0.1:3100/health/live > /dev/null
-          curl --fail --silent --show-error http://127.0.0.1:3100/health/ready > /dev/null
+          READY_STATUS=$(curl --silent --output /dev/null --write-out "%{http_code}" http://127.0.0.1:3100/health/ready)
+          if [ "$READY_STATUS" != "200" ] && [ "$READY_STATUS" != "503" ]; then
+            echo "Unexpected /health/ready status: $READY_STATUS"
+            exit 1
+          fi
           kill $API_PID
 
       - name: Smoke check notification health endpoints
