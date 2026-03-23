@@ -4,6 +4,7 @@ const cors = require('cors');
 const { rateLimit } = require('express-rate-limit');
 const apiRoutes = require('./routes/api');
 const authRoutes = require('./routes/auth');
+const { connectToDatabase } = require('./database');
 const { AppError } = require('./utils/errors');
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 
@@ -66,9 +67,16 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 if (require.main === module) {
-  app.listen(port, () => {
-    console.log(`School management API listening on port ${port}`);
-  });
+  connectToDatabase()
+    .then(() => {
+      app.listen(port, () => {
+        console.log(`School management API listening on port ${port}`);
+      });
+    })
+    .catch((error) => {
+      console.error('Database connection failed.', error);
+      process.exit(1);
+    });
 }
 
 module.exports = app;
