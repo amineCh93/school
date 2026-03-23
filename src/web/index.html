@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Capgemini School Portal</title>
+    <link rel="stylesheet" href="/portal/styles.css" />
+  </head>
+  <body>
+    <aside class="sidebar">
+      <img
+        class="brand-logo"
+        src="https://www.capgemini.com/wp-content/themes/capgemini2020/assets/images/logo.svg"
+        alt="Capgemini"
+      />
+      <h2>Capgemini School</h2>
+      <p class="muted">Enrollment · Access · Interactions</p>
+      <div class="session-block">
+        <strong>Session</strong>
+        <p id="sessionInfo">Not connected</p>
+      </div>
+      <button id="logoutBtn" class="ghost hidden">Logout</button>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <h1>Control Center</h1>
+        <p id="roleHint" class="pill">Role: Guest</p>
+      </header>
+
+      <section class="panel" id="authCard">
+        <div class="split">
+          <div>
+            <h3>Enroll (Register)</h3>
+            <form id="registerForm" class="grid three">
+              <label>Name<input type="text" id="registerName" required /></label>
+              <label>Email<input type="email" id="registerEmail" required /></label>
+              <label>Password<input type="password" id="registerPassword" required /></label>
+              <button type="submit">Create Account</button>
+            </form>
+          </div>
+          <div>
+            <h3>Access (Login)</h3>
+            <form id="loginForm" class="grid three">
+              <label>Email<input type="email" id="loginEmail" required /></label>
+              <label>Password<input type="password" id="loginPassword" required /></label>
+              <label>Role
+                <select id="loginRole" required>
+                  <option value="admin">Admin</option>
+                  <option value="headmaster">Headmaster</option>
+                  <option value="staff">Staff</option>
+                  <option value="viewer">Viewer</option>
+                </select>
+              </label>
+              <button type="submit">Login</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel hidden" id="dashboard" data-role="admin,headmaster,staff,viewer">
+        <h3>Overview</h3>
+        <div class="kpi-grid">
+          <article><span>Schools</span><strong id="schoolsCount">0</strong></article>
+          <article><span>Headmasters</span><strong id="headmastersCount">0</strong></article>
+          <article><span>Students</span><strong id="studentsCount">0</strong></article>
+        </div>
+      </section>
+
+      <section class="panel hidden" id="schoolsCard" data-role="admin,headmaster,staff">
+        <div class="panel-header">
+          <h3>Schools</h3>
+          <button id="refreshSchoolsBtn" class="ghost">Refresh</button>
+        </div>
+        <form id="createSchoolForm" class="grid three">
+          <label>Name<input type="text" id="schoolName" required /></label>
+          <label>Address<input type="text" id="schoolAddress" required /></label>
+          <button type="submit">Create School</button>
+        </form>
+        <ul id="schoolsList" class="list"></ul>
+      </section>
+
+      <section class="panel hidden" id="headmastersCard" data-role="admin,headmaster,staff">
+        <div class="panel-header">
+          <h3>Headmasters</h3>
+          <button id="refreshHeadmastersBtn" class="ghost">Refresh</button>
+        </div>
+        <form id="createHeadmasterForm" class="grid three">
+          <label>First Name<input type="text" id="headmasterFirstName" required /></label>
+          <label>Last Name<input type="text" id="headmasterLastName" required /></label>
+          <label>Email<input type="email" id="headmasterEmail" required /></label>
+          <button type="submit">Create Headmaster</button>
+        </form>
+        <ul id="headmastersList" class="list"></ul>
+      </section>
+
+      <section class="panel hidden" id="studentsCard" data-role="admin,headmaster,staff">
+        <div class="panel-header">
+          <h3>Students</h3>
+          <button id="refreshStudentsBtn" class="ghost">Refresh</button>
+        </div>
+        <form id="createStudentForm" class="grid three">
+          <label>First Name<input type="text" id="studentFirstName" required /></label>
+          <label>Last Name<input type="text" id="studentLastName" required /></label>
+          <label>Email<input type="email" id="studentEmail" required /></label>
+          <button type="submit">Create Student</button>
+        </form>
+        <ul id="studentsList" class="list"></ul>
+      </section>
+
+      <section class="panel hidden" id="interactionsCard" data-role="admin,headmaster">
+        <h3>User Interactions</h3>
+        <div class="split">
+          <form id="assignHeadmasterForm" class="grid two">
+            <label>School ID<input type="text" id="assignSchoolId" required /></label>
+            <label>Headmaster ID<input type="text" id="assignHeadmasterId" required /></label>
+            <button type="submit">Assign Headmaster</button>
+          </form>
+
+          <form id="enrollStudentForm" class="grid two">
+            <label>School ID<input type="text" id="enrollSchoolId" required /></label>
+            <label>Student ID<input type="text" id="enrollStudentId" required /></label>
+            <button type="submit">Enroll Student</button>
+          </form>
+
+          <form id="transferStudentForm" class="grid two">
+            <label>Student ID<input type="text" id="transferStudentId" required /></label>
+            <label>Target School ID<input type="text" id="targetSchoolId" required /></label>
+            <button type="submit">Transfer Student</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h3>Activity Log</h3>
+        <pre id="output"></pre>
+      </section>
+    </main>
+
+    <script src="/portal/app.js"></script>
+  </body>
+</html>
