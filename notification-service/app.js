@@ -7,6 +7,7 @@ const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
 const port = process.env.PORT || 4000;
+const shouldSkipDatabase = process.env.SKIP_DB === 'true';
 const allowedOrigins = new Set(
   (process.env.CORS_ORIGIN || 'http://localhost:3000')
     .split(',')
@@ -42,18 +43,27 @@ app.use('/notifications', notificationRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
+function startServer() {
+  app.listen(port, () => {
+    console.log(`Notification service listening on port ${port}`);
+  });
+}
+
 if (require.main === module) {
-  connectToDatabase()
-    .then(() => {
-      // Démarre le service une fois MongoDB disponible.
-      app.listen(port, () => {
-        console.log(`Notification service listening on port ${port}`);
+  if (shouldSkipDatabase) {
+    // Mode pratique pour visualiser rapidement le microservice sans dépendance MongoDB locale.
+    startServer();
+  } else {
+    connectToDatabase()
+      .then(() => {
+        // Démarre le service une fois MongoDB disponible.
+        startServer();
+      })
+      .catch((error) => {
+        console.error('Database connection failed.', error);
+        process.exit(1);
       });
-    })
-    .catch((error) => {
-      console.error('Database connection failed.', error);
-      process.exit(1);
-    });
+  }
 }
 
 module.exports = app;
